@@ -60,7 +60,7 @@ const deleteLetter = () => {
 };
 
 const handleClick = (key) => {
-  console.log('clicked', key);
+  // console.log('clicked', key);
   if (key === '«') {
     deleteLetter();
     return;
@@ -89,7 +89,7 @@ const showMessage = (message) => {
 const checkRow = () => {
   const guess = guessRows[currentRow].join('');
   if (currentTile === 5) {
-    console.log(`Guessed word is: ${guess}`);
+    // console.log(`Guessed word is: ${guess}`);
     flipTile();
     if (wordle === guess) {
       showMessage('Magnificient!');
@@ -113,23 +113,36 @@ const addColorToKey = (keyLetter,color) => {
   const key = document.getElementById(keyLetter)
   key.classList.add(color)
 }
-
+//gather data and then assign colors
 const flipTile = () => {
   const rowTiles = document.querySelector(`#guessRow-${currentRow}`).childNodes;
+  let checkWordle = wordle;//to remove words from the wordle as we check them
+  const guess = [];//push the guess and their assigned color
+
+  rowTiles.forEach(tile => {
+    guess.push({ letter: tile.getAttribute('data'), color: 'grey-overlay' });
+  })
+
+  guess.forEach((guess, index) => {
+    if (guess.letter === wordle[index]) {
+      guess.color = 'green-overlay';
+      checkWordle = checkWordle.replace(guess.letter, '');//prevents repeated letters from getting colored
+    }
+  });
+
+  guess.forEach(guess => {
+    if (checkWordle.includes(guess.letter)) {
+      guess.color = 'yellow-overlay';
+      checkWordle = checkWordle.replace(guess.letter, '');
+    }
+  })
+
   rowTiles.forEach((tile, index) => {
-    const dataLetter = tile.getAttribute('data');
+    // const dataLetter = tile.getAttribute('data');
     setTimeout(() => {
-        tile.classList.add('flip')
-        if (dataLetter == wordle[index]) {
-          tile.classList.add('green-overlay');
-          addColorToKey(dataLetter, 'green-overlay');
-        } else if (wordle.includes(dataLetter)) {
-          tile.classList.add('yellow-overlay');
-          addColorToKey(dataLetter, 'yellow-overlay');
-        } else {
-          tile.classList.add('grey-overlay');
-          addColorToKey(dataLetter, 'grey-overlay');
-        }
+      tile.classList.add('flip')
+      tile.classList.add(guess[index].color);
+      addColorToKey(guess[index].letter, guess[index].color);
     },500*index)
   });
 };
